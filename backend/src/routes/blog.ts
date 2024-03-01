@@ -6,7 +6,7 @@ import { verify } from "hono/jwt";
 export const blogRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
-    JWT_SECERT: string;
+    JWT_SECRET: string;
   };
   Variables: {
     userId: string;
@@ -16,7 +16,7 @@ export const blogRouter = new Hono<{
 blogRouter.use("/*", async (c, next) => {
   const authHeader = c.req.header("authorization") || "";
   const token = authHeader.split(" ")[1];
-  const response = await verify(token, c.env.JWT_SECERT);
+  const response = await verify(token, c.env.JWT_SECRET);
   try {
     if (response) {
       c.set("userId", response.id);
