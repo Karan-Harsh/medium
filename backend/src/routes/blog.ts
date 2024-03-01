@@ -6,6 +6,7 @@ import { verify } from "hono/jwt";
 export const blogRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
+    JWT_SECERT: string;
   };
   Variables: {
     userId: string;
@@ -15,14 +16,22 @@ export const blogRouter = new Hono<{
 blogRouter.use("/*", async (c, next) => {
   const authHeader = c.req.header("authorization") || "";
   const token = authHeader.split(" ")[1];
-  const response = await verify(token, "secret");
-  if (response) {
-    c.set("userId", response.id);
-    await next();
-  } else {
+  const response = await verify(token, c.env.JWT_SECERT);
+  try {
+    if (response) {
+      c.set("userId", response.id);
+      await next();
+    } else {
+      c.status(403);
+      return c.json({
+        message: "user not found",
+      });
+    }
+  } catch (e) {
+    console.log(e);
     c.status(403);
     return c.json({
-      message: "user not found",
+      message: "something went wrong",
     });
   }
 });

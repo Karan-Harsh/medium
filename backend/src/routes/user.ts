@@ -6,6 +6,7 @@ import { sign, verify } from "hono/jwt";
 export const userRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
+    JWT_SECRET: string;
   };
 }>();
 
@@ -22,7 +23,7 @@ userRouter.post("/signup", async (c) => {
     },
   });
 
-  const token = await sign({ id: user.id }, "secret");
+  const token = await sign({ id: user.id }, c.env.JWT_SECRET);
 
   return c.json({
     jwt: token,
@@ -50,7 +51,7 @@ userRouter.post("/signin", async (c) => {
       });
     }
 
-    const token = await sign({ id: user.id }, "secret");
+    const token = await sign({ id: user.id }, c.env.JWT_SECRET);
     return c.json({
       jwt: token,
     });
